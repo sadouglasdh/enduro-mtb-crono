@@ -5,9 +5,9 @@ Dois apps separados para tablet de Largada e tablet de Chegada.
 
 ## 🌐 Acesso Online
 
-- **Página inicial:** `https://SEU-USUARIO.github.io/enduro-mtb-crono/`
-- **Largada:** `https://SEU-USUARIO.github.io/enduro-mtb-crono/largada.html`
-- **Chegada:** `https://SEU-USUARIO.github.io/enduro-mtb-crono/chegada.html`
+- **Página inicial:** `https://sadouglasdh.github.io/enduro-mtb-crono/`
+- **Largada:** `https://sadouglasdh.github.io/enduro-mtb-crono/largada.html`
+- **Chegada:** `https://sadouglasdh.github.io/enduro-mtb-crono/chegada.html`
 
 ## 📁 Arquivos
 
