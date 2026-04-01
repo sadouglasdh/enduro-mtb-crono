@@ -30,6 +30,7 @@ Dois apps separados para tablet de Largada e tablet de Chegada.
 2. Cole a URL do app (largada ou chegada)
 3. Configure nome, ícone e cor
 4. Baixe o `.apk` e instale no tablet Android
+5. https://www.webintoapp.com/author/apps/1233584/edit
 
 ## 📋 Formato da Startlist CSV
 
