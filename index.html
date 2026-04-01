@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Enduro MTB — Cronometragem</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;900&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#111;color:#fff;font-family:'Barlow',sans-serif;overflow:hidden}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:24px}
+
+/* STRIPE TOPO */
+.stripe{position:fixed;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,#FFD600 50%,#D50000 50%)}
+
+/* LOGO */
+.logo-wrap{text-align:center;margin-bottom:48px}
+.logo-icon{font-size:56px;line-height:1;margin-bottom:12px}
+.logo-title{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;
+  letter-spacing:3px;text-transform:uppercase;color:#FFD600;line-height:1}
+.logo-sub{font-size:13px;color:#666;letter-spacing:2px;text-transform:uppercase;margin-top:6px}
+
+/* CARDS */
+.cards{display:flex;flex-direction:column;gap:16px;width:100%;max-width:400px}
+.card{display:flex;align-items:center;gap:20px;padding:22px 24px;border-radius:8px;
+  cursor:pointer;text-decoration:none;border:2px solid transparent;
+  transition:transform .1s;-webkit-tap-highlight-color:transparent}
+.card:active{transform:scale(.97)}
+.card.largada{background:rgba(255,214,0,.08);border-color:rgba(255,214,0,.3)}
+.card.chegada{background:rgba(213,0,0,.08);border-color:rgba(213,0,0,.3)}
+.card-icon{font-size:36px;flex-shrink:0}
+.card-info{}
+.card-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.card.largada .card-label{color:#FFD600}
+.card.chegada .card-label{color:#ff4444}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;
+  color:#fff;text-transform:uppercase;letter-spacing:1px;line-height:1}
+.card-desc{font-size:13px;color:#666;margin-top:4px}
+.card-arrow{margin-left:auto;font-size:24px;color:#333;flex-shrink:0}
+.card.largada .card-arrow{color:#FFD600}
+.card.chegada .card-arrow{color:#D50000}
+
+/* VERSAO */
+.versao{position:fixed;bottom:16px;font-size:11px;color:#333;letter-spacing:1px;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="stripe"></div>
+
+<div class="logo-wrap">
+  <div class="logo-icon">🚵</div>
+  <div class="logo-title">Enduro MTB</div>
+  <div class="logo-sub">Sistema de Cronometragem</div>
+</div>
+
+<div class="cards">
+  <a class="card largada" href="largada.html">
+    <div class="card-icon">🟡</div>
+    <div class="card-info">
+      <div class="card-label">Tablet da</div>
+      <div class="card-title">Largada</div>
+      <div class="card-desc">Startlist · Countdown · Exportar</div>
+    </div>
+    <div class="card-arrow">▶</div>
+  </a>
+
+  <a class="card chegada" href="chegada.html">
+    <div class="card-icon">🔴</div>
+    <div class="card-info">
+      <div class="card-label">Tablet da</div>
+      <div class="card-title">Chegada</div>
+      <div class="card-desc">Registrar · Especiais · Exportar</div>
+    </div>
+    <div class="card-arrow">▶</div>
+  </a>
+</div>
+
+<div class="versao">v4.0 · Enduro MTB Crono</div>
+</body>
+</html>

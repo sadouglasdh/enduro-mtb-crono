@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CHEGADA — Enduro MTB</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --am:#FFD600;--am2:#FFA000;--vd:#00C853;--vm:#D50000;
+  --br:#111111;--br2:#1C1C1C;--br3:#252525;--br4:#2E2E2E;
+  --txt:#FFFFFF;--txt2:#CCCCCC;--txt3:#888888;--borda:#333333;
+}
+html,body{height:100%;background:var(--br);color:var(--txt);font-family:'Barlow',sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+#app{display:flex;flex-direction:column;height:100vh}
+#header{background:var(--br2);border-bottom:1px solid var(--borda);padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;flex-shrink:0}
+#modo-badge{background:var(--vm);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;letter-spacing:3px;padding:5px 14px;border-radius:3px;text-transform:uppercase}
+#relogio{font-family:'Barlow Condensed',sans-serif;font-size:46px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--vm);letter-spacing:-2px;line-height:1}
+#inp-evento{background:var(--br3);border:1px solid var(--borda);border-radius:6px;color:var(--txt);padding:8px 12px;font-size:14px;font-family:'Barlow',sans-serif;width:220px;margin-left:auto}
+#inp-evento:focus{outline:none;border-color:var(--vm)}
+#import-bar{background:rgba(213,0,0,.08);border-bottom:1px solid rgba(213,0,0,.25);padding:8px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0}
+.import-lbl{font-size:10px;color:#ff6b6b;text-transform:uppercase;letter-spacing:1.5px;font-weight:700}
+.btn-file{background:var(--vm);border:none;border-radius:4px;color:#fff;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;text-transform:uppercase}
+.btn-file:active{background:#aa0000}
+#import-status{font-size:12px;color:var(--txt3)}
+#esp-bar{background:var(--br2);border-bottom:1px solid var(--borda);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0}
+#esp-bar label{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700}
+#esp-select{background:var(--br3);border:1px solid var(--borda);border-radius:6px;color:var(--am);padding:8px 14px;font-size:16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;min-width:180px;cursor:pointer}
+#esp-select:focus{outline:none;border-color:var(--am)}
+#esp-info{font-size:12px;color:var(--txt3)}
+#split{display:flex;flex:1;overflow:hidden}
+#lista-panel{width:280px;min-width:220px;flex-shrink:0;border-right:1px solid var(--borda);display:flex;flex-direction:column;overflow:hidden;background:var(--br2)}
+#lista-top{background:var(--br3);padding:10px 14px;border-bottom:1px solid var(--borda);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#lista-top span{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700}
+#lista-count{font-size:13px;color:var(--vm);font-weight:700;font-family:'Barlow Condensed',sans-serif}
+#lista-search{background:var(--br3);border:0;border-bottom:1px solid var(--borda);color:var(--txt);padding:11px 14px;font-size:15px;font-family:'Barlow',sans-serif;width:100%;flex-shrink:0}
+#lista-search:focus{outline:none;background:var(--br4)}
+#lista-search::placeholder{color:var(--txt3)}
+#lista-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#lista-body::-webkit-scrollbar{width:3px}
+#lista-body::-webkit-scrollbar-thumb{background:var(--borda)}
+.pc{padding:12px 14px;border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:12px;background:var(--br2);min-height:64px}
+.pc.pendente{cursor:pointer}
+.pc.pendente:active{background:var(--br3)}
+.pc.chegado{opacity:.35;pointer-events:none}
+.pc.chegado .pc-num{color:var(--vd)}
+.pc-num{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:var(--am);min-width:40px;text-align:center}
+.pc-info{flex:1;overflow:hidden}
+.pc-nome{font-size:15px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.pc-sub{display:flex;gap:6px;align-items:center;margin-top:4px}
+.pc-hora{font-size:12px;color:var(--txt3);font-variant-numeric:tabular-nums}
+.btn-chegou{background:var(--vm);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;flex-shrink:0;letter-spacing:.5px;text-transform:uppercase;min-height:48px;min-width:90px}
+.btn-chegou:active{background:#aa0000;transform:scale(.93)}
+#lista-vazia{text-align:center;color:var(--txt3);padding:40px 16px;font-size:14px;line-height:1.8}
+#tabela-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--br)}
+#tabela-header{background:var(--br3);padding:10px 16px;border-bottom:2px solid var(--vm);font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;flex-shrink:0;font-family:'Barlow Condensed',sans-serif}
+#tabela-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#tabela-scroll::-webkit-scrollbar{width:3px}
+#tabela-scroll::-webkit-scrollbar-thumb{background:var(--borda)}
+#tbl-empty{text-align:center;color:var(--txt3);padding:30px;font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+thead th{text-align:left;padding:8px 10px;position:sticky;top:0;background:var(--br3);z-index:1;font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid var(--vm);font-family:'Barlow Condensed',sans-serif}
+tbody tr{border-bottom:1px solid var(--borda)}
+tbody tr.novo td{color:var(--am)}
+tbody td{padding:10px 10px;color:var(--txt2);font-variant-numeric:tabular-nums}
+.hora-tag{font-size:13px;color:var(--txt3)}
+.cat-badge{font-size:11px;padding:3px 8px;border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.c0{background:rgba(55,138,221,.2);color:#7ab8f5}.c1{background:rgba(0,200,83,.2);color:#4ddb8a}
+.c2{background:rgba(200,122,224,.2);color:#e09af0}.c3{background:rgba(255,160,0,.2);color:#ffc14d}
+.c4{background:rgba(255,214,0,.2);color:#ffe566}.c5{background:rgba(0,212,200,.2);color:#4de8e0}
+.c6{background:rgba(213,0,0,.2);color:#ff6b6b}.c7{background:rgba(255,255,255,.1);color:#aaa}
+#footer{background:var(--br2);border-top:2px solid var(--borda);padding:10px 16px;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-shrink:0}
+#f-count{font-size:12px;color:var(--txt3);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;text-transform:uppercase}
+#f-btns{display:flex;gap:8px}
+.btn{background:var(--br3);border:1px solid var(--borda);border-radius:6px;color:var(--txt2);padding:8px 16px;font-size:13px;cursor:pointer;font-family:'Barlow',sans-serif;font-weight:500;min-height:44px}
+.btn:active{background:var(--br4)}
+.btn.prim{background:var(--vm);color:#fff;border-color:var(--vm);font-weight:700}
+.btn.prim:active{background:#aa0000}
+.btn.danger{background:rgba(213,0,0,.1);border-color:rgba(213,0,0,.4);color:#ff6b6b}
+.btn.danger:active{background:rgba(213,0,0,.2)}
+#flash{position:fixed;inset:0;background:rgba(213,0,0,.12);pointer-events:none;opacity:0;z-index:100;transition:opacity .06s}
+#flash.on{opacity:1}
+#toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--br2);color:var(--vm);border:1px solid rgba(213,0,0,.5);padding:10px 22px;border-radius:4px;font-size:14px;font-weight:600;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;opacity:0;pointer-events:none;z-index:200;transition:opacity .2s,transform .2s;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#modal-overlay{display:none}
+#modal-overlay.aberto{display:flex!important}
+.mfg{display:flex;flex-direction:column;gap:6px}
+.mlbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.minp{background:var(--br3);border:1px solid var(--borda);border-radius:6px;color:var(--txt);padding:11px 14px;font-size:16px;font-family:'Barlow',sans-serif;width:100%}
+.minp:focus{outline:none;border-color:var(--vm)}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="flash"></div><div id="toast"></div>
+
+<div id="header">
+  <div id="modo-badge">Chegada</div>
+  <div id="relogio">--:--:--</div>
+  <input id="inp-evento" type="text" placeholder="Nome do evento...">
+</div>
+
+<div id="import-bar">
+  <span class="import-lbl">📋 Startlist</span>
+  <label class="btn-file" for="input-startlist">Importar CSV / Excel</label>
+  <input type="file" id="input-startlist" accept=".csv,.xlsx,.xls" style="display:none">
+  <span id="import-status">Importe a startlist para ver os pilotos</span>
+</div>
+
+<div id="esp-bar">
+  <label>Especial ativa</label>
+  <select id="esp-select"><option value="">— selecione —</option></select>
+  <span id="esp-info"></span>
+</div>
+
+<div id="split">
+  <div id="lista-panel">
+    <div id="lista-top">
+      <span>Pilotos</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="lista-count">—</span>
+        <button id="btn-add-chegada" title="Registrar chegada manual"
+          style="background:var(--vm);color:#fff;border:none;border-radius:6px;
+          padding:3px 9px;font-size:18px;line-height:1;cursor:pointer;font-weight:700;
+          transition:background .15s" onmouseover="this.style.background='#aa0000'" onmouseout="this.style.background='var(--vm)'">＋</button>
+      </div>
+    </div>
+    <input id="lista-search" type="text" placeholder="Buscar nº ou nome...">
+    <div id="lista-body">
+      <div id="lista-vazia">Importe a startlist e selecione a especial</div>
+    </div>
+  </div>
+
+  <div id="tabela-panel">
+    <div id="tabela-header">Chegadas registradas — <span id="count-inline">0</span></div>
+    <div id="tabela-scroll">
+      <div id="tbl-empty">Nenhuma chegada registrada</div>
+      <table id="tbl" style="display:none">
+        <thead><tr>
+          <th>#</th><th>Nº</th><th>Piloto</th><th>Cat</th><th>Gên</th><th>Chegada</th><th></th>
+        </tr></thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CHEGADA MANUAL -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center">
+  <div style="background:var(--br2);border-radius:8px;border:1px solid var(--borda);padding:24px;width:340px;max-width:94vw;
+    box-shadow:0 8px 40px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--txt)">Registrar chegada</span>
+      <button onclick="fecharModal()" style="background:var(--br3);border:none;border-radius:4px;color:var(--txt3);font-size:18px;cursor:pointer;padding:2px 8px;line-height:1">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="mfg">
+        <label class="mlbl">Nº do piloto</label>
+        <input id="m-num" type="number" min="1" placeholder="000" class="minp">
+      </div>
+      <div class="mfg">
+        <label class="mlbl">Nome</label>
+        <input id="m-nome" type="text" placeholder="Nome completo" class="minp">
+      </div>
+      <div style="display:flex;gap:10px">
+        <div class="mfg" style="flex:1">
+          <label class="mlbl">Categoria</label>
+          <input id="m-cat" type="text" placeholder="Ex: Elite" class="minp" list="m-cat-list">
+          <datalist id="m-cat-list"></datalist>
+        </div>
+        <div class="mfg" style="width:90px">
+          <label class="mlbl">Gênero</label>
+          <select id="m-gen" class="minp" style="padding:9px 10px">
+            <option value="M">♂ M</option>
+            <option value="F">♀ F</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="fecharModal()" class="btn" style="padding:8px 18px">Cancelar</button>
+      <button onclick="confirmarChegadaManual()" class="btn prim" style="padding:8px 22px">Registrar chegada</button>
+    </div>
+  </div>
+</div>
+
+<div id="footer">
+  <span id="f-count">0 chegadas</span>
+  <div id="f-btns">
+    <button class="btn prim" id="btn-encerrar">Encerrar e exportar</button>
+    <button class="btn danger" id="btn-limpar">Limpar</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ══ STATE ══════════════════════════════════════════════════════════════════
+let startlist={};   // especial -> [{num,nome,cat,gen,ordem,horaLargada}]
+let chegadas=[];    // chegadas da especial ativa
+let espAtiva=null;
+
+const CORES=['c0','c1','c2','c3','c4','c5','c6','c7'];
+const catCores={};let cIdx=0;
+function cc(cat){if(!catCores[cat]){catCores[cat]=CORES[cIdx%CORES.length];cIdx++}return catCores[cat]}
+
+function tick(){document.getElementById('relogio').textContent=new Date().toLocaleTimeString('pt-BR')}
+setInterval(tick,500);tick();
+
+function toast(msg,err){
+  const t=document.getElementById('toast');t.textContent=msg;
+  t.style.background=err?'#2a0a0a':'';t.style.color=err?'var(--vermelho)':'';t.style.borderColor=err?'#a32d2d':'';
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);
+}
+function flash(){const f=document.getElementById('flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),180)}
+
+// ══ IMPORTAR STARTLIST ════════════════════════════════════════════════════
+document.getElementById('input-startlist').addEventListener('change',function(){
+  const file=this.files[0];if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='csv'){const r=new FileReader();r.onload=e=>processarCSV(e.target.result);r.readAsText(file,'UTF-8')}
+  else{const r=new FileReader();r.onload=e=>{const wb=XLSX.read(e.target.result,{type:'binary'});
+    processarCSV(XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]))};r.readAsBinaryString(file)}
+});
+
+function processarCSV(csv){
+  const linhas=csv.trim().split('\n').map(l=>l.split(/[,;]/).map(c=>c.trim().replace(/^"|"$/g,'')));
+  const hdr=linhas[0].map(h=>h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''));
+  const i={
+    num:hdr.findIndex(h=>h.includes('num')),
+    nome:hdr.findIndex(h=>h.includes('nome')||h.includes('piloto')),
+    cat:hdr.findIndex(h=>h.includes('cat')||h.includes('classe')),
+    gen:hdr.findIndex(h=>h.includes('gen')||h.includes('sexo')),
+    esp:hdr.findIndex(h=>h.includes('especial')||h.includes('trilha')),
+    ordem:hdr.findIndex(h=>h.includes('ordem')||h.includes('order')),
+    hora:hdr.findIndex(h=>h.includes('hora')||h.includes('largada')||h.includes('time'))
+  };
+  startlist={};
+  linhas.slice(1).forEach(l=>{
+    if(!l[0]&&!l[1])return;
+    const esp=i.esp>=0?(l[i.esp]||'Especial 1'):'Especial 1';
+    if(!startlist[esp])startlist[esp]=[];
+    startlist[esp].push({
+      num:i.num>=0?l[i.num]:'',nome:i.nome>=0?l[i.nome]:'',
+      cat:i.cat>=0?(l[i.cat]||'Geral'):'Geral',
+      gen:i.gen>=0?(l[i.gen]||'M'):'M',
+      ordem:i.ordem>=0?(parseInt(l[i.ordem])||999):999,
+      horaLargada:i.hora>=0?l[i.hora]:null,especial:esp
+    });
+  });
+  Object.keys(startlist).forEach(e=>{startlist[e].sort((a,b)=>a.ordem-b.ordem)});
+  // atualizar select de especiais
+  const sel=document.getElementById('esp-select');
+  sel.innerHTML='<option value="">— selecione —</option>';
+  Object.keys(startlist).forEach(esp=>{
+    const o=document.createElement('option');o.value=esp;o.textContent=esp;sel.appendChild(o);
+  });
+  // atualizar datalist de categorias
+  const cats=new Set(Object.values(startlist).flat().map(p=>p.cat));
+  const dl=document.getElementById('cat-list');dl.innerHTML='';
+  cats.forEach(c=>{const o=document.createElement('option');o.value=c;dl.appendChild(o)});
+  const total=Object.values(startlist).reduce((s,a)=>s+a.length,0);
+  document.getElementById('import-status').textContent=`✓ ${total} entradas — ${Object.keys(startlist).length} especiais`;
+  // auto-selecionar primeira especial
+  if(Object.keys(startlist).length>0){sel.value=Object.keys(startlist)[0];selecionarEsp(Object.keys(startlist)[0])}
+  toast(`Startlist: ${total} entradas`);
+}
+
+// ══ SELECIONAR ESPECIAL ═══════════════════════════════════════════════════
+document.getElementById('esp-select').addEventListener('change',function(){
+  if(this.value)selecionarEsp(this.value);
+});
+
+function selecionarEsp(esp){
+  if(espAtiva&&chegadas.length>0&&esp!==espAtiva){
+    if(!confirm(`Trocar para "${esp}"? As chegadas não exportadas serão perdidas.`))
+      {document.getElementById('esp-select').value=espAtiva;return}
+  }
+  espAtiva=esp;chegadas=[];
+  const tot=(startlist[esp]||[]).length;
+  document.getElementById('esp-info').textContent=`${tot} pilotos`;
+  renderLista();renderTabela();
+  toast(`Especial ativa: ${esp}`);
+}
+
+// ══ LISTA ════════════════════════════════════════════════════════════════
+document.getElementById('lista-search').addEventListener('input',renderLista);
+
+function renderLista(){
+  const body=document.getElementById('lista-body');
+  const vazia=document.getElementById('lista-vazia');
+  if(!espAtiva||!startlist[espAtiva]){vazia.style.display='';return}
+  vazia.style.display='none';
+  const q=document.getElementById('lista-search').value.trim().toLowerCase();
+  const chegadosNums=new Set(chegadas.map(c=>c.num));
+  let lista=[...startlist[espAtiva]];
+  if(q)lista=lista.filter(p=>(p.num+'').includes(q)||(p.nome||'').toLowerCase().includes(q));
+  lista.sort((a,b)=>{
+    const aC=chegadosNums.has(a.num),bC=chegadosNums.has(b.num);
+    if(aC&&!bC)return 1;if(!aC&&bC)return -1;return a.ordem-b.ordem;
+  });
+  body.innerHTML='';body.appendChild(vazia);
+  lista.forEach(p=>{
+    const chegou=chegadosNums.has(p.num);
+    const div=document.createElement('div');
+    div.className='pc '+(chegou?'chegado':'pendente');
+    div.innerHTML=`
+      <div class="pc-num">${p.num||'?'}</div>
+      <div class="pc-info">
+        <div class="pc-nome">${p.nome||'—'}</div>
+        <div class="pc-sub">
+          <span class="cat-badge ${cc(p.cat)}">${p.cat}</span>
+          <span style="font-size:11px;color:var(--mudo)">${p.gen==='F'?'♀':'♂'}</span>
+          ${p.horaLargada?`<span class="pc-hora">${p.horaLargada}</span>`:''}
+        </div>
+      </div>
+      ${chegou?`<span style="color:var(--verde);font-size:16px;flex-shrink:0">✓</span>`
+              :`<button class="btn-chegou" onclick="registrar('${p.num}','${(p.nome||'').replace(/'/g,"\\'")}','${(p.cat||'').replace(/'/g,"\\'")}','${p.gen||'M'}')">Chegou</button>`}`;
+    body.appendChild(div);
+  });
+  const tot=(startlist[espAtiva]||[]).length;
+  document.getElementById('lista-count').textContent=`${chegadosNums.size}/${tot}`;
+}
+
+// ══ REGISTRAR ═════════════════════════════════════════════════════════════
+function registrar(num,nome,cat,gen,manual){
+  if(!espAtiva){toast('Selecione a especial primeiro',true);return}
+  const agora=new Date();
+  chegadas.unshift({id:Date.now(),num,nome,cat,gen:gen||'M',manual:!!manual,
+    chegada:agora.toLocaleTimeString('pt-BR'),chegadaMs:agora.getTime()});
+  renderTabela();renderLista();flash();
+  toast(`#${num||'?'} ${nome||'—'} — chegada registrada!`);
+  const tot=(startlist[espAtiva]||[]).length;
+  if(tot>0&&chegadas.length>=tot)setTimeout(()=>encerrar(true),300);
+}
+
+// ══ MODAL CHEGADA MANUAL ══════════════════════════════════════════════════
+document.getElementById('btn-add-chegada').addEventListener('click',abrirModal);
+
+function abrirModal(){
+  if(!espAtiva){toast('Selecione a especial primeiro',true);return}
+  const cats=new Set(Object.values(startlist).flat().map(p=>p.cat));
+  const dl=document.getElementById('m-cat-list');dl.innerHTML='';
+  cats.forEach(c=>{const o=document.createElement('option');o.value=c;dl.appendChild(o)});
+  document.getElementById('m-num').value='';
+  document.getElementById('m-nome').value='';
+  document.getElementById('m-cat').value='';
+  document.getElementById('m-gen').value='M';
+  document.getElementById('modal-overlay').classList.add('aberto');
+  setTimeout(()=>document.getElementById('m-num').focus(),100);
+}
+
+function fecharModal(){
+  document.getElementById('modal-overlay').classList.remove('aberto');
+}
+
+document.getElementById('modal-overlay').addEventListener('click',function(e){
+  if(e.target===this)fecharModal();
+});
+
+// ao digitar número, auto-preenche da startlist
+document.getElementById('m-num').addEventListener('input',function(){
+  const p=(startlist[espAtiva]||[]).find(p=>p.num===this.value.trim());
+  if(p){
+    document.getElementById('m-nome').value=p.nome||'';
+    document.getElementById('m-cat').value=p.cat||'';
+    document.getElementById('m-gen').value=p.gen||'M';
+  }
+});
+
+function confirmarChegadaManual(){
+  const num=document.getElementById('m-num').value.trim();
+  const nome=document.getElementById('m-nome').value.trim();
+  const cat=document.getElementById('m-cat').value.trim()||'Geral';
+  const gen=document.getElementById('m-gen').value;
+  if(!num&&!nome){toast('Informe pelo menos o número ou o nome',true);return}
+  fecharModal();
+  registrar(num,nome,cat,gen,true);
+}
+
+function remover(id){chegadas=chegadas.filter(c=>c.id!==id);renderTabela();renderLista()}
+
+// ══ TABELA ════════════════════════════════════════════════════════════════
+function renderTabela(){
+  const body=document.getElementById('tbl-body');
+  const tbl=document.getElementById('tbl');
+  const empty=document.getElementById('tbl-empty');
+  body.innerHTML='';
+  const n=chegadas.length;
+  document.getElementById('f-count').textContent=`${n} chegada${n!==1?'s':''}`;
+  document.getElementById('count-inline').textContent=n;
+  if(n===0){empty.style.display='';tbl.style.display='none';return}
+  empty.style.display='none';tbl.style.display='';
+  chegadas.forEach((c,i)=>{
+    const tr=document.createElement('tr');if(i===0)tr.classList.add('novo');
+    tr.innerHTML=`
+      <td style="color:var(--mudo2);font-size:12px">${n-i}</td>
+      <td style="font-weight:700;font-size:15px">${c.num||'—'}</td>
+      <td>${c.nome||'—'}${c.manual?' <span style="font-size:10px;background:#fff3e8;color:var(--laranja);border-radius:3px;padding:1px 5px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.5px">MANUAL</span>':''}</td>
+      <td><span class="cat-badge ${cc(c.cat||'Geral')}">${c.cat||'Geral'}</span></td>
+      <td style="font-size:12px;color:var(--mudo)">${c.gen==='F'?'♀':'♂'}</td>
+      <td class="hora-tag">${c.chegada}</td>
+      <td><button class="btn danger" style="padding:3px 8px;font-size:12px" onclick="remover(${c.id})">✕</button></td>`;
+    body.appendChild(tr);
+  });
+}
+
+// ══ ENCERRAR E EXPORTAR ═══════════════════════════════════════════════════
+document.getElementById('btn-encerrar').addEventListener('click',()=>encerrar(false));
+function encerrar(auto){
+  if(!espAtiva){toast('Nenhuma especial ativa',true);return}
+  if(chegadas.length===0){toast('Nenhuma chegada registrada',true);return}
+  if(!auto&&!confirm(`Encerrar "${espAtiva}" e exportar arquivo de chegada?`))return;
+  const evento=document.getElementById('inp-evento').value.trim();
+  const data={tipo:'chegada',especial:espAtiva,evento,
+    pilotos:chegadas.map(c=>({id:c.id,num:c.num,nome:c.nome,cat:c.cat,gen:c.gen,
+      chegada:c.chegada,chegadaMs:c.chegadaMs}))};
+  const slug=espAtiva.replace(/\s+/g,'_');
+  const nome=`chegada_${slug}.json`;
+  const a=document.createElement('a');
+  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(data,null,2));
+  a.download=nome;a.click();
+  toast(`${nome} exportado!`);
+}
+
+document.getElementById('btn-limpar').addEventListener('click',()=>{
+  if(!chegadas.length)return;
+  if(confirm('Apagar todas as chegadas desta especial?')){chegadas=[];renderTabela();renderLista();toast('Apagado')}
+});
+</script>
+</body>
+</html>

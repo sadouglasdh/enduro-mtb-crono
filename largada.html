@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>LARGADA — Enduro MTB</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --am:#FFD600;--am2:#FFA000;--vd:#00C853;--vm:#D50000;
+  --br:#111111;--br2:#1C1C1C;--br3:#252525;--br4:#2E2E2E;
+  --txt:#FFFFFF;--txt2:#CCCCCC;--txt3:#888888;--borda:#333333;
+}
+html,body{height:100%;background:var(--br);color:var(--txt);font-family:'Barlow',sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+#app{display:flex;flex-direction:column;height:100vh}
+#nav{display:flex;background:var(--br2);border-bottom:3px solid var(--am);overflow-x:auto;flex-shrink:0}
+#nav::-webkit-scrollbar{height:0}
+.tab{padding:13px 20px;font-size:12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;color:var(--txt3);border-bottom:3px solid transparent;margin-bottom:-3px;white-space:nowrap;user-select:none;transition:color .15s}
+.tab:active{background:var(--br3)}
+.tab.ativo{color:var(--am);border-bottom-color:var(--am);background:rgba(255,214,0,.06)}
+.tab.esp-tab.ativo{color:var(--am);border-bottom-color:var(--am)}
+.tab.res-tab.ativo{color:var(--vd);border-bottom-color:var(--vd);background:rgba(0,200,83,.06)}
+.page{display:none;flex-direction:column;flex:1;overflow:hidden}
+.page.ativo{display:flex}
+#header{background:var(--br2);border-bottom:1px solid var(--borda);padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;flex-shrink:0}
+#modo-badge{background:var(--am);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;letter-spacing:3px;padding:5px 14px;border-radius:3px;text-transform:uppercase}
+#relogio{font-family:'Barlow Condensed',sans-serif;font-size:46px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--am);letter-spacing:-2px;line-height:1}
+#inp-evento{background:var(--br3);border:1px solid var(--borda);border-radius:6px;color:var(--txt);padding:8px 12px;font-size:14px;font-family:'Barlow',sans-serif;width:220px;margin-left:auto}
+#inp-evento:focus{outline:none;border-color:var(--am)}
+#import-bar{background:rgba(255,214,0,.06);border-bottom:1px solid rgba(255,214,0,.2);padding:8px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0}
+.import-lbl{font-size:10px;color:var(--am);text-transform:uppercase;letter-spacing:1.5px;font-weight:700}
+.btn-file{background:var(--am);border:none;border-radius:4px;color:#000;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;text-transform:uppercase}
+.btn-file:active{background:var(--am2)}
+#import-status{font-size:12px;color:var(--txt3)}
+.btn-modelo{background:transparent;border:1px solid var(--borda);border-radius:4px;color:var(--txt3);padding:5px 12px;font-size:12px;cursor:pointer;font-family:'Barlow',sans-serif;margin-left:auto}
+.btn-modelo:active{background:var(--br3)}
+#lista-panel{width:300px;min-width:240px;flex-shrink:0;border-right:1px solid var(--borda);display:flex;flex-direction:column;overflow:hidden;background:var(--br2)}
+#lista-top{background:var(--br3);padding:10px 14px;border-bottom:1px solid var(--borda);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#lista-top span{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700}
+#lista-count{font-size:13px;color:var(--am);font-weight:700;font-family:'Barlow Condensed',sans-serif}
+#lista-search{background:var(--br3);border:0;border-bottom:1px solid var(--borda);color:var(--txt);padding:11px 14px;font-size:15px;font-family:'Barlow',sans-serif;width:100%;flex-shrink:0}
+#lista-search:focus{outline:none;background:var(--br4)}
+#lista-search::placeholder{color:var(--txt3)}
+#lista-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#lista-body::-webkit-scrollbar{width:3px}
+#lista-body::-webkit-scrollbar-thumb{background:var(--borda)}
+.pr{padding:12px 14px;border-bottom:1px solid var(--borda);cursor:pointer;display:flex;align-items:center;gap:12px;user-select:none;background:var(--br2);min-height:64px}
+.pr:active{background:var(--br3)}
+.pr.sel{background:rgba(255,214,0,.08);border-left:4px solid var(--am)}
+.pr.ok{opacity:.35;pointer-events:none}
+.pr.ok .pr-num{color:var(--vd)}
+.pr-num{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:var(--am);min-width:40px;text-align:center;line-height:1}
+.pr-info{flex:1;overflow:hidden}
+.pr-nome{font-size:15px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.pr-sub{display:flex;gap:6px;align-items:center;margin-top:4px}
+.pr-hora{font-size:12px;color:var(--txt3);font-variant-numeric:tabular-nums}
+.pr-cd{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;min-width:56px;text-align:right;flex-shrink:0;color:var(--am)}
+.pr-cd.urg{color:var(--vm);animation:pisca .5s infinite}
+@keyframes pisca{0%,100%{opacity:1}50%{opacity:.2}}
+#lista-vazia{text-align:center;color:var(--txt3);padding:40px 16px;font-size:14px;line-height:1.8}
+#right-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--br)}
+#card{background:var(--br2);border-bottom:1px solid var(--borda);padding:14px 16px;flex-shrink:0}
+#card.ativo{border-bottom:3px solid var(--am)}
+#card-vazio{font-size:14px;color:var(--txt3);text-align:center;padding:18px 0}
+#card-cont{display:none;gap:16px;align-items:center;flex-wrap:wrap}
+#card-cont.vis{display:flex}
+#card-num{font-family:'Barlow Condensed',sans-serif;font-size:68px;font-weight:900;color:var(--am);line-height:1;min-width:80px;text-align:center}
+#card-info{flex:1}
+#card-nome{font-size:22px;font-weight:700;color:var(--txt)}
+#card-meta{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
+#card-cat{font-size:11px;padding:3px 10px;border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+#card-hora{font-size:13px;color:var(--txt3);font-variant-numeric:tabular-nums}
+#card-gen{font-size:11px;color:var(--txt3);padding:2px 8px;border:1px solid var(--borda);border-radius:3px}
+#timer-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0}
+#timer-lbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px}
+#timer{font-family:'Barlow Condensed',sans-serif;font-size:54px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-2px;line-height:1;color:var(--am)}
+#timer.urg{color:var(--vm);animation:pisca .4s infinite}
+#btn-largar{background:var(--am);color:#000;border:none;border-radius:8px;padding:14px 36px;font-size:22px;font-weight:900;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1.5px;text-transform:uppercase;transition:transform .1s;flex-shrink:0;min-width:160px;min-height:60px}
+#btn-largar:disabled{background:var(--br4);color:var(--txt3);cursor:not-allowed}
+#btn-largar:not(:disabled):active{transform:scale(.93);background:var(--am2)}
+#tbl-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#tbl-wrap::-webkit-scrollbar{width:3px}
+#tbl-wrap::-webkit-scrollbar-thumb{background:var(--borda)}
+#tbl-empty{text-align:center;color:var(--txt3);padding:30px;font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+thead th{text-align:left;padding:8px 10px;position:sticky;top:0;background:var(--br3);z-index:1;font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid var(--am);font-family:'Barlow Condensed',sans-serif}
+tbody tr{border-bottom:1px solid var(--borda)}
+tbody tr.novo td{color:var(--am)}
+tbody td{padding:10px 10px;color:var(--txt2);font-variant-numeric:tabular-nums}
+.footer{background:var(--br2);border-top:2px solid var(--borda);padding:10px 16px;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-shrink:0}
+.f-count{font-size:12px;color:var(--txt3);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;text-transform:uppercase}
+.f-btns{display:flex;gap:8px}
+.esp-hdr{background:var(--br2);border-bottom:3px solid var(--am);padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0}
+.esp-badge{background:var(--am);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;letter-spacing:3px;padding:5px 14px;border-radius:3px;text-transform:uppercase}
+.esp-nome{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:var(--am)}
+.esp-ibar{background:rgba(255,214,0,.06);border-bottom:1px solid rgba(255,214,0,.15);padding:8px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0}
+.esp-itit{font-size:10px;color:var(--am);text-transform:uppercase;letter-spacing:1.5px;font-weight:700}
+.btn-file-am{background:var(--am);border:none;border-radius:4px;color:#000;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;text-transform:uppercase}
+.btn-file-am:active{background:var(--am2)}
+.esp-st{font-size:12px;color:var(--txt3)}
+.btn-calc{background:var(--vd);color:#000;border:none;border-radius:4px;padding:7px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase}
+.btn-calc:active{transform:scale(.96)}
+.esp-body{flex:1;overflow-y:auto;padding:14px 16px;background:var(--br);-webkit-overflow-scrolling:touch}
+.res-hdr{background:var(--br2);border-bottom:3px solid var(--vd);padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0}
+.res-badge{background:var(--vd);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;letter-spacing:3px;padding:5px 14px;border-radius:3px;text-transform:uppercase}
+.res-body{flex:1;overflow-y:auto;padding:16px;background:var(--br);-webkit-overflow-scrolling:touch}
+.res-footer{background:var(--br2);border-top:1px solid var(--borda);padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+.res-sec{margin-bottom:24px}
+.gen-hdr{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:2px;padding:10px 14px;margin:20px 0 10px;display:flex;align-items:center;gap:10px;border-radius:4px}
+.gen-hdr.m{color:#000;background:var(--am)}
+.gen-hdr.f{color:#fff;background:var(--vm)}
+.cat-hdr{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;margin:14px 0 6px;display:flex;align-items:center;gap:8px}
+.rtbl{width:100%;border-collapse:collapse;font-size:14px;border-radius:4px;overflow:hidden}
+.rtbl th{text-align:left;padding:8px 10px;font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid var(--am);font-family:'Barlow Condensed',sans-serif;background:var(--br3);white-space:nowrap}
+.rtbl td{padding:9px 10px;border-bottom:1px solid var(--borda);font-variant-numeric:tabular-nums;color:var(--txt2)}
+.rtbl tr:last-child td{border-bottom:none}
+.rtbl td.rank{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--txt3)}
+.rtbl td.rank.g1{color:var(--am)}.rtbl td.rank.g2{color:#aaa}.rtbl td.rank.g3{color:#cd7f32}
+.rtbl td.total{font-weight:700;color:var(--vd);font-size:15px}
+.rtbl td.total.top{color:var(--am)}
+.rtbl td.dnf{color:var(--vm);font-weight:700;font-size:13px}
+.rtbl td.t-esp{font-size:13px;color:var(--txt2)}
+.rtbl td.t-esp.melhor{font-weight:700;color:var(--am)}
+.cat-badge{font-size:11px;padding:3px 8px;border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.c0{background:rgba(55,138,221,.2);color:#7ab8f5}.c1{background:rgba(0,200,83,.2);color:#4ddb8a}
+.c2{background:rgba(200,122,224,.2);color:#e09af0}.c3{background:rgba(255,160,0,.2);color:#ffc14d}
+.c4{background:rgba(255,214,0,.2);color:#ffe566}.c5{background:rgba(0,212,200,.2);color:#4de8e0}
+.c6{background:rgba(213,0,0,.2);color:#ff6b6b}.c7{background:rgba(255,255,255,.1);color:#aaa}
+.btn{background:var(--br3);border:1px solid var(--borda);border-radius:6px;color:var(--txt2);padding:8px 16px;font-size:13px;cursor:pointer;font-family:'Barlow',sans-serif;font-weight:500;min-height:44px}
+.btn:active{background:var(--br4)}
+.btn.prim{background:var(--vd);color:#000;border-color:var(--vd);font-weight:700}
+.btn.prim:active{background:#00a846}
+.btn.warn{background:rgba(255,214,0,.1);border-color:rgba(255,214,0,.4);color:var(--am)}
+.btn.warn:active{background:rgba(255,214,0,.2)}
+.btn.danger{background:rgba(213,0,0,.1);border-color:rgba(213,0,0,.4);color:#ff6b6b}
+.btn.danger:active{background:rgba(213,0,0,.2)}
+.btn.amarelo{background:var(--am);color:#000;border-color:var(--am);font-weight:700}
+.btn.amarelo:active{background:var(--am2)}
+#flash{position:fixed;inset:0;background:rgba(255,214,0,.12);pointer-events:none;opacity:0;z-index:100;transition:opacity .06s}
+#flash.on{opacity:1}
+#toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--br2);color:var(--am);border:1px solid rgba(255,214,0,.4);padding:10px 22px;border-radius:4px;font-size:14px;font-weight:600;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;opacity:0;pointer-events:none;z-index:200;transition:opacity .2s,transform .2s;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#modal-overlay{display:none}
+#modal-overlay.aberto{display:flex!important}
+.mfg{display:flex;flex-direction:column;gap:6px}
+.mlbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.minp{background:var(--br3);border:1px solid var(--borda);border-radius:6px;color:var(--txt);padding:11px 14px;font-size:16px;font-family:'Barlow',sans-serif;width:100%}
+.minp:focus{outline:none;border-color:var(--am)}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="flash"></div><div id="toast"></div>
+
+<!-- NAV -->
+<div id="nav">
+  <div class="tab ativo" data-pg="largada">Largada</div>
+  <div class="tab res-tab" data-pg="resultado">Resultado Final</div>
+</div>
+
+<!-- ══ PAGE LARGADA ══════════════════════════════════════════════ -->
+<div class="page ativo" id="page-largada" style="flex-direction:column">
+
+  <div id="header">
+    <div id="modo-badge">Largada</div>
+    <div id="relogio">--:--:--</div>
+    <input id="inp-evento" type="text" placeholder="Nome do evento...">
+  </div>
+
+  <div id="import-bar">
+    <span class="import-lbl">📋 Startlist</span>
+    <label class="btn-file" for="input-startlist">Importar CSV / Excel</label>
+    <input type="file" id="input-startlist" accept=".csv,.xlsx,.xls" style="display:none">
+    <span id="import-status">Nenhum arquivo importado</span>
+    <button class="btn-modelo" id="btn-modelo">Baixar modelo CSV</button>
+  </div>
+
+  <!-- especiais tabs dentro da largada -->
+  <div style="display:flex;background:var(--bg2);border-bottom:1px solid var(--borda);overflow-x:auto;flex-shrink:0" id="esp-nav"></div>
+
+  <!-- split: lista + direita -->
+  <div id="pg-largada" style="display:flex;flex:1;overflow:hidden">
+    <div id="lista-panel">
+      <div id="lista-top">
+        <span id="lista-esp-nome">—</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="lista-count">—</span>
+          <button id="btn-add-piloto" title="Adicionar piloto manualmente"
+            style="background:var(--verde);color:#fff;border:none;border-radius:6px;
+            padding:3px 9px;font-size:18px;line-height:1;cursor:pointer;font-weight:700;
+            transition:background .15s" onmouseover="this.style.background='#0c9660'" onmouseout="this.style.background='var(--verde)'">＋</button>
+        </div>
+      </div>
+      <input id="lista-search" type="text" placeholder="Buscar nº, nome...">
+      <div id="lista-body">
+        <div id="lista-vazia">Importe a startlist para ver os pilotos</div>
+      </div>
+    </div>
+
+    <div id="right-panel">
+      <div id="card">
+        <div id="card-vazio">← Selecione um piloto para preparar a largada</div>
+        <div id="card-cont">
+          <div id="card-num">—</div>
+          <div id="card-info">
+            <div id="card-nome">—</div>
+            <div id="card-meta">
+              <span id="card-cat" class="cat-badge">—</span>
+              <span id="card-gen" class="gen-badge">—</span>
+              <span id="card-hora">—</span>
+            </div>
+          </div>
+          <div id="timer-wrap">
+            <div id="timer-lbl">Falta</div>
+            <div id="timer">--:--</div>
+          </div>
+          <button id="btn-largar" disabled>▶ Largar</button>
+        </div>
+      </div>
+
+      <div id="tbl-wrap">
+        <div id="tbl-empty">Nenhum piloto largado nesta especial</div>
+        <table id="tbl-largados" style="display:none">
+          <thead><tr>
+            <th>#</th><th>Nº</th><th>Piloto</th><th>Cat</th><th>Largada prevista</th><th>Largada real</th><th></th>
+          </tr></thead>
+          <tbody id="tbl-body"></tbody>
+        </table>
+      </div>
+
+      <div class="footer">
+        <span class="f-count" id="f-count">0 largados</span>
+        <div class="f-btns">
+          <button class="btn warn" id="btn-encerrar-esp">Encerrar especial</button>
+          <button class="btn danger" id="btn-limpar">Limpar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL PILOTO MANUAL ══════════════════════════════════════════ -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border-radius:16px;padding:24px;width:340px;max-width:94vw;
+    box-shadow:0 8px 40px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;
+        text-transform:uppercase;letter-spacing:1px;color:var(--texto)">Adicionar piloto</span>
+      <button onclick="fecharModal()" style="background:var(--bg3);border:none;border-radius:6px;
+        color:var(--mudo);font-size:18px;cursor:pointer;padding:2px 8px;line-height:1">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="mfg">
+        <label class="mlbl">Nº do piloto</label>
+        <input id="m-num" type="number" min="1" placeholder="000" class="minp">
+      </div>
+      <div class="mfg">
+        <label class="mlbl">Nome</label>
+        <input id="m-nome" type="text" placeholder="Nome completo" class="minp">
+      </div>
+      <div style="display:flex;gap:10px">
+        <div class="mfg" style="flex:1">
+          <label class="mlbl">Categoria</label>
+          <input id="m-cat" type="text" placeholder="Ex: Elite" class="minp" list="m-cat-list">
+          <datalist id="m-cat-list"></datalist>
+        </div>
+        <div class="mfg" style="width:90px">
+          <label class="mlbl">Gênero</label>
+          <select id="m-gen" class="minp" style="padding:9px 10px">
+            <option value="M">♂ M</option>
+            <option value="F">♀ F</option>
+          </select>
+        </div>
+      </div>
+      <div class="mfg">
+        <label class="mlbl">Horário previsto (opcional)</label>
+        <input id="m-hora" type="time" step="1" class="minp">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="fecharModal()" class="btn" style="padding:8px 18px">Cancelar</button>
+      <button onclick="confirmarPilotoManual()" class="btn prim" style="padding:8px 22px">Adicionar à lista</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE RESULTADO ══════════════════════════════════════════════ -->
+<div class="page" id="page-resultado">
+  <div class="res-hdr">
+    <div class="res-badge">Resultado Final</div>
+    <span id="res-evento" style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--azul)"></span>
+    <span id="res-info" style="font-size:13px;color:var(--mudo);margin-left:8px"></span>
+  </div>
+
+  <!-- painel de importação por especial -->
+  <div id="res-import-panel" style="background:var(--bg3);border-bottom:1px solid var(--borda);padding:12px 16px;flex-shrink:0;overflow-y:auto;max-height:220px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-size:11px;color:var(--mudo);text-transform:uppercase;letter-spacing:1px;font-weight:700">Importar arquivos por especial</span>
+      <button class="btn" id="btn-add-esp-res" style="font-size:12px;padding:4px 12px">＋ Adicionar especial</button>
+    </div>
+    <div id="res-esp-lista" style="display:flex;flex-direction:column;gap:8px">
+      <div style="color:var(--mudo2);font-size:13px;text-align:center;padding:8px 0">
+        Clique em "＋ Adicionar especial" para começar
+      </div>
+    </div>
+  </div>
+
+  <div class="res-body" id="res-body">
+    <div style="text-align:center;color:var(--mudo2);padding:40px 0;font-size:15px">
+      Adicione as especiais e importe os arquivos de largada e chegada para calcular o resultado
+    </div>
+  </div>
+  <div class="res-footer">
+    <button class="btn prim" id="btn-calc-res">Calcular resultado</button>
+    <button class="btn" id="btn-exp-res" style="display:none">Exportar TXT</button>
+    <button class="btn" id="btn-exp-pdf" style="display:none">Exportar PDF</button>
+    <button class="btn" id="btn-wpp-res" style="display:none">WhatsApp</button>
+    <button class="btn danger" id="btn-reset-res" style="display:none">Resetar</button>
+  </div>
+</div>
+
+</div><!-- app -->
+<script>
+// ══ STATE ══════════════════════════════════════════════════════════════════
+// startlist: { especial -> [{num,nome,cat,gen,ordem,horaLargada}] }
+let startlist = {};
+// largados: { especial -> [{id,num,nome,cat,gen,horaLargada,largadaReal,largadaMs}] }
+let largados = {};
+// especial ativa na largada
+let espAtiva = null;
+let pilotoSel = null;
+let chegadasImportadas = {}; // mantido para compatibilidade mas não usado no cálculo
+let resEspeciais = {}; // especial -> {largada:[...], chegada:[...]}
+let resEspNomes = []; // ordem das especiais no resultado
+
+const CORES=['c0','c1','c2','c3','c4','c5','c6','c7'];
+const catCores={};let cIdx=0;
+function cc(cat){if(!catCores[cat]){catCores[cat]=CORES[cIdx%CORES.length];cIdx++}return catCores[cat]}
+
+// ══ CLOCK ══════════════════════════════════════════════════════════════════
+function tick(){
+  document.getElementById('relogio').textContent=new Date().toLocaleTimeString('pt-BR');
+  tickCountdowns();
+}
+setInterval(tick,500);tick();
+
+// ══ TOAST / FLASH ══════════════════════════════════════════════════════════
+function toast(msg,err){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.background=err?'#2a0a0a':'';
+  t.style.color=err?'var(--vermelho)':'';t.style.borderColor=err?'#a32d2d':'';
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);
+}
+function flash(){const f=document.getElementById('flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),200)}
+
+// ══ TABS NAV ═══════════════════════════════════════════════════════════════
+document.getElementById('nav').addEventListener('click',e=>{
+  const t=e.target.closest('.tab');
+  if(t&&t.dataset.pg)mudarPg(t.dataset.pg);
+});
+function mudarPg(pg){
+  document.querySelectorAll('#nav .tab').forEach(t=>t.classList.toggle('ativo',t.dataset.pg===pg));
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('ativo',p.id==='page-'+pg));
+  if(pg==='resultado')renderResultado();
+}
+
+// ══ IMPORTAR STARTLIST ════════════════════════════════════════════════════
+document.getElementById('input-startlist').addEventListener('change',function(){
+  const file=this.files[0];if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='csv'){
+    const r=new FileReader();r.onload=e=>processarCSV(e.target.result);r.readAsText(file,'UTF-8');
+  } else {
+    const r=new FileReader();
+    r.onload=e=>{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      processarCSV(XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]));
+    };r.readAsBinaryString(file);
+  }
+});
+
+function processarCSV(csv){
+  const linhas=csv.trim().split('\n').map(l=>l.split(/[,;]/).map(c=>c.trim().replace(/^"|"$/g,'')));
+  const hdr=linhas[0].map(h=>h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''));
+  const i={
+    num: hdr.findIndex(h=>h.includes('num')),
+    nome: hdr.findIndex(h=>h.includes('nome')||h.includes('piloto')),
+    cat: hdr.findIndex(h=>h.includes('cat')||h.includes('classe')),
+    gen: hdr.findIndex(h=>h.includes('gen')||h.includes('sexo')),
+    esp: hdr.findIndex(h=>h.includes('especial')||h.includes('trilha')||h.includes('especial')),
+    ordem: hdr.findIndex(h=>h.includes('ordem')||h.includes('order')),
+    hora: hdr.findIndex(h=>h.includes('hora')||h.includes('largada')||h.includes('time'))
+  };
+  startlist={};largados={};
+  linhas.slice(1).forEach(l=>{
+    if(!l[0]&&!l[1])return;
+    const esp=i.esp>=0?(l[i.esp]||'Especial 1'):'Especial 1';
+    if(!startlist[esp])startlist[esp]=[];
+    if(!largados[esp])largados[esp]=[];
+    startlist[esp].push({
+      num:i.num>=0?l[i.num]:'',
+      nome:i.nome>=0?l[i.nome]:'',
+      cat:i.cat>=0?(l[i.cat]||'Geral'):'Geral',
+      gen:i.gen>=0?(l[i.gen]||'M'):'M',
+      ordem:i.ordem>=0?(parseInt(l[i.ordem])||999):999,
+      horaLargada:i.hora>=0?l[i.hora]:null,
+      especial:esp
+    });
+  });
+  // ordenar por ordem dentro de cada especial
+  Object.keys(startlist).forEach(e=>startlist[e].sort((a,b)=>a.ordem-b.ordem));
+  const total=Object.values(startlist).reduce((s,a)=>s+a.length,0);
+  document.getElementById('import-status').textContent=`✓ ${total} entradas — ${Object.keys(startlist).length} especiais`;
+  construirEspTabs();
+  toast(`Startlist importada: ${total} entradas`);
+}
+
+document.getElementById('btn-modelo').addEventListener('click',()=>{
+  const csv='numero,nome,categoria,genero,especial,ordem,hora_largada\n1,Carlos Ferreira,Elite,M,Especial 1,1,09:00:00\n1,Carlos Ferreira,Elite,M,Especial 2,1,10:00:00\n2,Ana Paula Gomes,Elite,F,Especial 1,2,09:01:00\n2,Ana Paula Gomes,Elite,F,Especial 2,2,10:01:00\n3,Pedro Santos,Master A,M,Especial 1,3,09:02:00\n3,Pedro Santos,Master A,M,Especial 2,3,10:02:00';
+  const a=document.createElement('a');
+  a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='modelo_startlist.csv';a.click();
+});
+
+// ══ ESPECIAIS TABS (dentro da largada) ════════════════════════════════════
+function construirEspTabs(){
+  const nav=document.getElementById('esp-nav');
+  nav.innerHTML='';
+  Object.keys(startlist).forEach((esp,idx)=>{
+    const t=document.createElement('div');
+    t.className='tab esp-tab'+(idx===0?' ativo':'');
+    t.textContent=esp;t.dataset.esp=esp;
+    t.addEventListener('click',()=>selecionarEsp(esp));
+    nav.appendChild(t);
+  });
+  if(Object.keys(startlist).length>0)selecionarEsp(Object.keys(startlist)[0]);
+}
+
+function selecionarEsp(esp){
+  espAtiva=esp;
+  pilotoSel=null;
+  document.querySelectorAll('#esp-nav .tab').forEach(t=>t.classList.toggle('ativo',t.dataset.esp===esp));
+  document.getElementById('lista-esp-nome').textContent=esp;
+  resetCard();
+  renderLista();
+  renderTabelaLargados();
+}
+
+// ══ LISTA DE PILOTOS ══════════════════════════════════════════════════════
+document.getElementById('lista-search').addEventListener('input',renderLista);
+
+function renderLista(){
+  const body=document.getElementById('lista-body');
+  const vazia=document.getElementById('lista-vazia');
+  if(!espAtiva||!startlist[espAtiva]){vazia.style.display='';return}
+  vazia.style.display='none';
+  const q=document.getElementById('lista-search').value.trim().toLowerCase();
+  const largadosNums=new Set((largados[espAtiva]||[]).map(p=>p.num));
+  let lista=[...startlist[espAtiva]];
+  if(q)lista=lista.filter(p=>(p.num+'').includes(q)||(p.nome||'').toLowerCase().includes(q));
+  lista.sort((a,b)=>{
+    const aL=largadosNums.has(a.num),bL=largadosNums.has(b.num);
+    if(aL&&!bL)return 1;if(!aL&&bL)return -1;return a.ordem-b.ordem;
+  });
+  body.innerHTML='';body.appendChild(vazia);
+  lista.forEach(p=>{
+    const largado=largadosNums.has(p.num);
+    const sel=pilotoSel&&pilotoSel.num===p.num;
+    const div=document.createElement('div');
+    div.className='pr'+(sel?' sel':'')+(largado?' ok':'');
+    div.dataset.num=p.num;
+    const cdId=`cd-${espAtiva}-${p.num}`.replace(/\s/g,'_');
+    div.innerHTML=`
+      <div class="pr-num">${p.num||'?'}</div>
+      <div class="pr-info">
+        <div class="pr-nome">${p.nome||'—'} ${p.manual?'<span style="font-size:10px;background:#fff3e8;color:var(--amarelo);border-radius:3px;padding:1px 5px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.5px">MANUAL</span>':''}</div>
+        <div class="pr-sub">
+          <span class="cat-badge ${cc(p.cat)}">${p.cat}</span>
+          <span style="font-size:11px;color:var(--mudo)">${p.gen==='F'?'♀':'♂'}</span>
+          ${p.horaLargada?`<span class="pr-hora">${p.horaLargada}</span>`:''}
+        </div>
+      </div>
+      ${largado?`<span style="color:var(--verde);font-size:16px">✓</span>`:
+        p.horaLargada?`<span class="pr-cd" id="${cdId}">--:--</span>`:''
+      }`;
+    if(!largado)div.addEventListener('click',()=>selecionarPiloto(p));
+    body.appendChild(div);
+  });
+  const tot=startlist[espAtiva].length;
+  document.getElementById('lista-count').textContent=`${largadosNums.size}/${tot}`;
+}
+
+// ══ COUNTDOWNS ════════════════════════════════════════════════════════════
+function tickCountdowns(){
+  if(!espAtiva||!startlist[espAtiva])return;
+  const agora=new Date();
+  const agoraMs=agora.getHours()*3600000+agora.getMinutes()*60000+agora.getSeconds()*1000;
+  startlist[espAtiva].forEach(p=>{
+    if(!p.horaLargada)return;
+    const id=`cd-${espAtiva}-${p.num}`.replace(/\s/g,'_');
+    const el=document.getElementById(id);if(!el)return;
+    const diff=horaMs(p.horaLargada)-agoraMs;
+    if(diff<=0){el.textContent='AGORA';el.className='pr-cd urg'}
+    else{
+      const m=Math.floor(diff/60000),s=Math.floor((diff%60000)/1000);
+      el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      el.className='pr-cd'+(diff<30000?' urg':'');
+    }
+  });
+  // card timer
+  if(pilotoSel&&pilotoSel.horaLargada){
+    const diff=horaMs(pilotoSel.horaLargada)-agoraMs;
+    const el=document.getElementById('timer');
+    const lbl=document.getElementById('timer-lbl');
+    if(diff<=0){el.textContent='AGORA!';el.className='urg';lbl.textContent='Hora!'}
+    else{
+      const m=Math.floor(diff/60000),s=Math.floor((diff%60000)/1000);
+      el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      el.className=diff<30000?'urg':'';lbl.textContent='Falta';
+    }
+  }
+}
+function horaMs(h){const[hh,mm,ss]=h.split(':').map(Number);return(hh*3600+mm*60+(ss||0))*1000}
+
+// ══ SELECIONAR PILOTO ════════════════════════════════════════════════════
+function selecionarPiloto(p){
+  pilotoSel=p;
+  document.getElementById('card-vazio').style.display='none';
+  document.getElementById('card-cont').classList.add('vis');
+  document.getElementById('card').classList.add('ativo');
+  document.getElementById('card-num').textContent=p.num||'?';
+  document.getElementById('card-nome').textContent=p.nome||'—';
+  const ce=document.getElementById('card-cat');ce.textContent=p.cat;ce.className='cat-badge '+cc(p.cat);
+  document.getElementById('card-gen').textContent=p.gen==='F'?'♀ Feminino':'♂ Masculino';
+  document.getElementById('card-hora').textContent=p.horaLargada?`Prev: ${p.horaLargada}`:'';
+  if(!p.horaLargada){document.getElementById('timer').textContent='--:--';document.getElementById('timer').className=''}
+  document.getElementById('btn-largar').disabled=false;
+  document.querySelectorAll('.pr').forEach(r=>r.classList.toggle('sel',r.dataset.num===p.num));
+}
+
+function resetCard(){
+  pilotoSel=null;
+  document.getElementById('card-vazio').style.display='';
+  document.getElementById('card-cont').classList.remove('vis');
+  document.getElementById('card').classList.remove('ativo');
+  document.getElementById('btn-largar').disabled=true;
+}
+
+// ══ LARGAR ════════════════════════════════════════════════════════════════
+document.getElementById('btn-largar').addEventListener('click',largar);
+function largar(){
+  if(!pilotoSel||!espAtiva)return;
+  const p=pilotoSel;
+  const agora=new Date();
+  const reg={
+    id:Date.now(),num:p.num,nome:p.nome,cat:p.cat,gen:p.gen,
+    horaLargada:p.horaLargada,especial:espAtiva,
+    largadaReal:agora.toLocaleTimeString('pt-BR'),
+    largadaMs:agora.getTime()
+  };
+  if(!largados[espAtiva])largados[espAtiva]=[];
+  largados[espAtiva].unshift(reg);
+  // verificar se foi o último
+  const tot=startlist[espAtiva]?.length||0;
+  const nLarg=largados[espAtiva].length;
+  resetCard();renderLista();renderTabelaLargados();flash();
+  toast(`#${p.num} ${p.nome} — LARGOU!`);
+  if(nLarg>=tot)setTimeout(()=>encerrarEsp(true),300);
+}
+
+// ══ TABELA LARGADOS ═══════════════════════════════════════════════════════
+function removerLargado(esp,id){
+  largados[esp]=(largados[esp]||[]).filter(p=>p.id!==id);
+  renderLista();renderTabelaLargados();
+}
+function renderTabelaLargados(){
+  const body=document.getElementById('tbl-body');
+  const tbl=document.getElementById('tbl-largados');
+  const empty=document.getElementById('tbl-empty');
+  const fc=document.getElementById('f-count');
+  body.innerHTML='';
+  const lista=(largados[espAtiva]||[]);
+  fc.textContent=`${lista.length} largado${lista.length!==1?'s':''}`;
+  if(lista.length===0){empty.style.display='';tbl.style.display='none';return}
+  empty.style.display='none';tbl.style.display='';
+  lista.forEach((p,i)=>{
+    const tr=document.createElement('tr');
+    if(i===0)tr.classList.add('novo');
+    tr.innerHTML=`
+      <td style="color:#333;font-size:12px">${lista.length-i}</td>
+      <td style="font-weight:700;font-size:15px">${p.num||'—'}</td>
+      <td style="color:#ccc">${p.nome||'—'}</td>
+      <td><span class="cat-badge ${cc(p.cat)}">${p.cat}</span></td>
+      <td class="hora">${p.horaLargada||'—'}</td>
+      <td style="color:var(--verde);font-weight:600">${p.largadaReal}</td>
+      <td><button class="btn danger" style="padding:3px 8px;font-size:12px" onclick="removerLargado('${espAtiva}',${p.id})">✕</button></td>`;
+    body.appendChild(tr);
+  });
+}
+
+// ══ ENCERRAR ESPECIAL → gera largada_EspX.json ═══════════════════════════
+document.getElementById('btn-encerrar-esp').addEventListener('click',()=>encerrarEsp(false));
+function encerrarEsp(auto){
+  if(!espAtiva)return;
+  const lista=largados[espAtiva]||[];
+  if(lista.length===0){toast('Nenhum piloto largado nesta especial',true);return}
+  if(!auto&&!confirm(`Encerrar "${espAtiva}" e gerar arquivo de largada?`))return;
+  const data={
+    tipo:'largada',
+    evento:document.getElementById('inp-evento').value||'',
+    especial:espAtiva,
+    pilotos:lista.map(p=>({
+      num:p.num,nome:p.nome,cat:p.cat,gen:p.gen,
+      horaLargada:p.horaLargada,
+      largadaReal:p.largadaReal,largadaMs:p.largadaMs
+    }))
+  };
+  const slug=espAtiva.replace(/\s+/g,'_');
+  baixar(data,`largada_${slug}.json`);
+  toast(`largada_${slug}.json gerado!`);
+}
+
+// ══ LIMPAR ════════════════════════════════════════════════════════════════
+document.getElementById('btn-limpar').addEventListener('click',()=>{
+  if(!espAtiva)return;
+  if(!(largados[espAtiva]||[]).length)return;
+  if(confirm(`Apagar todos os largados de "${espAtiva}"?`)){
+    largados[espAtiva]=[];resetCard();renderLista();renderTabelaLargados();toast('Apagado');
+  }
+});
+
+// ══ RESULTADO — IMPORT POR ESPECIAL ══════════════════════════════════════
+document.getElementById('btn-add-esp-res').addEventListener('click', adicionarEspRes);
+
+function adicionarEspRes(){
+  const nome = prompt('Nome da especial (ex: Especial 1):');
+  if(!nome||!nome.trim()) return;
+  const esp = nome.trim();
+  if(resEspeciais[esp]){ toast(`"${esp}" já foi adicionada`, true); return; }
+  resEspeciais[esp] = {largada: null, chegada: null};
+  resEspNomes.push(esp);
+  renderResImportPanel();
+  toast(`"${esp}" adicionada`);
+}
+
+function renderResImportPanel(){
+  const lista = document.getElementById('res-esp-lista');
+  if(!resEspNomes.length){
+    lista.innerHTML = '<div style="color:var(--mudo2);font-size:13px;text-align:center;padding:8px 0">Clique em "＋ Adicionar especial" para começar</div>';
+    return;
+  }
+  lista.innerHTML = resEspNomes.map(esp => {
+    const d = resEspeciais[esp];
+    const largOk = d.largada !== null;
+    const chegOk = d.chegada !== null;
+    return `<div style="background:var(--bg2);border:1px solid var(--borda);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--texto);min-width:100px">${esp}</span>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:5px 12px;border-radius:6px;font-size:13px;border:1px solid ${largOk?'var(--verde)':'var(--borda2)'};background:${largOk?'var(--verde-claro)':'var(--bg3)'};color:${largOk?'var(--verde)':'var(--mudo)'}">
+        ${largOk?'✓ Largada importada':'📂 Largada'}
+        <input type="file" accept=".json" style="display:none" onchange="importarArqRes('${esp}','largada',this)">
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:5px 12px;border-radius:6px;font-size:13px;border:1px solid ${chegOk?'var(--amarelo)':'var(--borda2)'};background:${chegOk?'var(--amarelo-claro)':'var(--bg3)'};color:${chegOk?'var(--amarelo)':'var(--mudo)'}">
+        ${chegOk?'✓ Chegada importada':'📥 Chegada'}
+        <input type="file" accept=".json" style="display:none" onchange="importarArqRes('${esp}','chegada',this)">
+      </label>
+      <button onclick="removerEspRes('${esp}')" style="margin-left:auto;background:transparent;border:none;color:var(--mudo2);cursor:pointer;font-size:16px;padding:2px 6px">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function importarArqRes(esp, tipo, input){
+  const file = input.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    try{
+      const d = JSON.parse(e.target.result);
+      if(d.tipo !== tipo) throw new Error(`Esperado tipo "${tipo}", recebido "${d.tipo}"`);
+      if(!resEspeciais[esp]) resEspeciais[esp] = {largada:null, chegada:null};
+      resEspeciais[esp][tipo] = d.pilotos;
+      renderResImportPanel();
+      toast(`${esp} — ${tipo} importada (${d.pilotos.length} pilotos)`);
+    } catch(err){ toast(`Arquivo inválido: ${err.message||file.name}`, true); }
+  };
+  r.readAsText(file);
+}
+
+function removerEspRes(esp){
+  delete resEspeciais[esp];
+  resEspNomes = resEspNomes.filter(e => e !== esp);
+  renderResImportPanel();
+}
+
+document.getElementById('btn-calc-res').addEventListener('click', calcularResultado);
+
+function calcularResultado(){
+  const espsCalc = resEspNomes.filter(e => resEspeciais[e]?.largada && resEspeciais[e]?.chegada);
+  if(!espsCalc.length){
+    toast('Importe largada + chegada de pelo menos uma especial', true); return;
+  }
+
+  // construir mapa de pilotos a partir dos arquivos de largada importados
+  const pilotos = {};
+  espsCalc.forEach(esp => {
+    resEspeciais[esp].largada.forEach(p => {
+      if(!pilotos[p.num]) pilotos[p.num] = {
+        num:p.num, nome:p.nome, cat:p.cat, gen:p.gen||'M',
+        tempos:{}, totalMs:0, dnfEsps:[], dnf:false
+      };
+    });
+  });
+
+  // calcular tempos usando horários reais dos arquivos
+  espsCalc.forEach(esp => {
+    const largMap = {};
+    resEspeciais[esp].largada.forEach(p => {
+      largMap[p.num] = {ms: p.largadaMs, hora: p.largadaReal || p.horaLargada};
+    });
+    const chegMap = {};
+    resEspeciais[esp].chegada.forEach(c => { chegMap[c.num] = c; });
+
+    Object.keys(pilotos).forEach(num => {
+      const larg = largMap[num];
+      const cheg = chegMap[num];
+      if(!larg){ pilotos[num].dnf=true; pilotos[num].dnfEsps.push(esp); return; }
+      if(!cheg){ pilotos[num].dnf=true; pilotos[num].dnfEsps.push(esp); return; }
+      const diff = cheg.chegadaMs - larg.ms;
+      if(diff <= 0){ pilotos[num].dnf=true; pilotos[num].dnfEsps.push(esp); return; }
+      pilotos[num].tempos[esp] = {ms:diff, str:msStr(diff), largada:larg.hora, chegada:cheg.chegada};
+      pilotos[num].totalMs += diff;
+    });
+  });
+
+  const todos = Object.values(pilotos);
+  todos.forEach(p => { p.totalStr = p.dnf ? null : msStr(p.totalMs); });
+  todos.sort((a,b) => {
+    if(a.dnf&&b.dnf) return 0; if(a.dnf) return 1; if(b.dnf) return -1;
+    return a.totalMs - b.totalMs;
+  });
+
+  const evento = document.getElementById('inp-evento').value ||
+    (resEspeciais[espsCalc[0]]?.largada?.[0] && '') || '';
+  window._res = {pilotos:todos, esps:espsCalc, evento};
+  renderResultado();
+  ['btn-exp-res','btn-exp-pdf','btn-wpp-res','btn-reset-res'].forEach(id=>document.getElementById(id).style.display='');
+  toast(`Resultado calculado — ${espsCalc.length} especial${espsCalc.length!==1?'is':''}`);
+}
+
+function msStr(ms){
+  if(!ms||ms<0)return null;
+  const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),
+        s=Math.floor((ms%60000)/1000),cs=Math.floor((ms%1000)/10);
+  return h>0?`${h}h${String(m).padStart(2,'0')}m${String(s).padStart(2,'0')}s`
+            :`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
+}
+
+function renderResultado(){
+  const d=window._res;if(!d)return;
+  document.getElementById('res-evento').textContent=d.evento||'Evento';
+  document.getElementById('res-info').textContent=`${d.esps.length} especial${d.esps.length!==1?'is':''}`;
+
+  // melhor tempo por cat+gen+especial
+  const melhorKey={};
+  d.pilotos.forEach(p=>{
+    d.esps.forEach(e=>{
+      const t=p.tempos[e];if(!t)return;
+      const k=`${p.gen}|${p.cat}|${e}`;
+      if(!melhorKey[k]||t.ms<melhorKey[k])melhorKey[k]=t.ms;
+    });
+  });
+
+  const th=t=>`<th>${t}</th>`;
+  const espsH=d.esps.map(e=>`<th style="max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e}</th>`).join('');
+
+  function tbl(lista,showCat){
+    if(!lista.length)return '<p style="color:var(--mudo2);font-size:13px;padding:8px 0">Nenhum piloto</p>';
+    const semDnf=lista.filter(p=>!p.dnf);
+    let h=`<table class="rtbl"><thead><tr>${th('Pos')}${th('Nº')}${th('Piloto')}${showCat?th('Cat'):''}${espsH}${th('Total')}</tr></thead><tbody>`;
+    lista.forEach(p=>{
+      const pos=p.dnf?null:semDnf.findIndex(x=>x.num===p.num)+1;
+      const gc=pos===1?'g1':pos===2?'g2':pos===3?'g3':'';
+      h+=`<tr>
+        <td class="rank ${gc}">${p.dnf?'—':pos+'º'}</td>
+        <td style="font-weight:700">${p.num}</td>
+        <td style="color:var(--texto)">${p.nome}</td>
+        ${showCat?`<td><span class="cat-badge ${cc(p.cat)}">${p.cat}</span></td>`:''}
+        ${d.esps.map(e=>{
+          const t=p.tempos[e];const dnf=p.dnfEsps.includes(e);
+          if(dnf)return`<td class="dnf">DNF</td>`;
+          if(!t)return`<td style="color:var(--mudo2)">—</td>`;
+          const isMelhor=melhorKey[`${p.gen}|${p.cat}|${e}`]===t.ms;
+          return`<td class="t-esp${isMelhor?' melhor':''}">
+            <span class="tempo-val">${t.str}</span>${isMelhor?' 🏅':''}
+            <br><span style="font-size:11px;color:var(--mudo)">${t.largada}→${t.chegada}</span>
+          </td>`;
+        }).join('')}
+        ${p.dnf?`<td class="dnf">DNF</td>`:`<td class="total${pos===1?' top':''}">${p.totalStr}</td>`}
+      </tr>`;
+    });
+    return h+'</tbody></table>';
+  }
+
+  const genLabel={M:'♂ Masculino',F:'♀ Feminino'};
+  let html='';
+
+  // Geral Masculino + Feminino separados
+  ['M','F'].forEach(gen=>{
+    const gp=d.pilotos.filter(p=>p.gen===gen);if(!gp.length)return;
+    html+=`<div class="res-sec">
+      <div class="gen-hdr ${gen==='M'?'m':'f'}" style="margin:0 0 10px">${genLabel[gen]} — Geral</div>
+      ${tbl(gp,true)}
+    </div>`;
+    // por categoria dentro do gênero
+    const cats=[...new Set(gp.map(p=>p.cat))];
+    if(cats.length>1){
+      cats.forEach(cat=>{
+        const cp=gp.filter(p=>p.cat===cat);if(!cp.length)return;
+        html+=`<div class="res-sec" style="margin-top:4px">
+          <div class="cat-hdr"><span class="cat-badge ${cc(cat)}">${cat}</span>
+            <span style="font-size:11px;color:var(--mudo)">${gen==='M'?'Masculino':'Feminino'}</span>
+          </div>
+          ${tbl(cp,false)}
+        </div>`;
+      });
+    }
+    html+=`<div style="height:16px"></div>`;
+  });
+
+  document.getElementById('res-body').innerHTML=html;
+}
+
+// ══ EXPORTAR / WHATSAPP ══════════════════════════════════════════════════
+document.getElementById('btn-exp-res').addEventListener('click',()=>{
+  const d=window._res;if(!d)return;
+  const semDnf=d.pilotos.filter(p=>!p.dnf);
+  let txt=`RESULTADO FINAL — ${d.evento||'Evento'}\nGerado: ${new Date().toLocaleString('pt-BR')}\nEspeciais: ${d.esps.join(', ')}\n\n`;
+  txt+=`═══ GERAL ═══\n`;
+  d.pilotos.forEach(p=>{
+    const pos=p.dnf?'DNF':semDnf.findIndex(x=>x.num===p.num)+1+'º';
+    txt+=`${pos.padEnd(4)} #${(p.num||'?').padEnd(4)} ${(p.nome||'—').padEnd(22)} ${(p.cat||'').padEnd(12)} ${p.gen}  ${p.totalStr||'DNF'}\n`;
+    d.esps.forEach(e=>{const t=p.tempos[e];txt+=`       ${e}: ${p.dnfEsps.includes(e)?'DNF':t?t.str:'—'}\n`});
+  });
+  const genOrder=['M','F'],genLabel={M:'MASCULINO',F:'FEMININO'};
+  genOrder.forEach(gen=>{
+    const gp=d.pilotos.filter(p=>p.gen===gen);if(!gp.length)return;
+    txt+=`\n═══ ${genLabel[gen]} ═══\n`;
+    const cats=[...new Set(gp.map(p=>p.cat))];
+    cats.forEach(cat=>{
+      const cp=gp.filter(p=>p.cat===cat);const semDnfC=cp.filter(p=>!p.dnf);
+      txt+=`\n  — ${cat} —\n`;
+      cp.forEach(p=>{const pos=p.dnf?'DNF':semDnfC.findIndex(x=>x.num===p.num)+1+'º';
+        txt+=`  ${pos.padEnd(4)} #${(p.num||'?').padEnd(4)} ${(p.nome||'—').padEnd(22)} ${p.totalStr||'DNF'}\n`});
+    });
+  });
+  baixar(txt,`resultado_${(d.evento||'evento').replace(/\s/g,'_')}.txt`,'text/plain');
+  toast('Resultado exportado');
+});
+
+document.getElementById('btn-wpp-res').addEventListener('click',()=>{
+  const d=window._res;if(!d)return;
+  const genLabel={M:'♂ Masculino',F:'♀ Feminino'};
+  let msg=`🏆 *${d.evento||'Resultado'} — Resultado Final*\n📍 ${d.esps.join(' | ')}\n\n`;
+  ['M','F'].forEach(gen=>{
+    const gp=d.pilotos.filter(p=>p.gen===gen);if(!gp.length)return;
+    msg+=`*${genLabel[gen]}*\n`;
+    const cats=[...new Set(gp.map(p=>p.cat))];
+    cats.forEach(cat=>{
+      const cp=gp.filter(p=>p.cat===cat);const sd=cp.filter(p=>!p.dnf);
+      msg+=`_${cat}_\n`;
+      cp.forEach(p=>{const pos=p.dnf?null:sd.findIndex(x=>x.num===p.num)+1;
+        const em=pos===1?'🥇':pos===2?'🥈':pos===3?'🥉':'▸';
+        msg+=`${em} ${pos?pos+'º':'DNF'} #${p.num} ${p.nome} — ${p.totalStr||'DNF'}\n`});
+    });msg+='\n';
+  });
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+});
+
+document.getElementById('btn-reset-res').addEventListener('click',()=>{
+  resEspeciais={};resEspNomes=[];window._res=null;
+  renderResImportPanel();
+  document.getElementById('res-body').innerHTML='<div style="text-align:center;color:var(--mudo2);padding:40px 0;font-size:15px">Adicione as especiais e importe os arquivos de largada e chegada para calcular o resultado</div>';
+  ['btn-exp-res','btn-exp-pdf','btn-wpp-res','btn-reset-res'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('res-evento').textContent='';
+  document.getElementById('res-info').textContent='';
+  toast('Resultado resetado');
+});
+
+// ══ EXPORTAR PDF ══════════════════════════════════════════════════════════
+document.getElementById('btn-exp-pdf').addEventListener('click', exportarPDF);
+
+function exportarPDF(){
+  const d=window._res;if(!d)return;
+  const evento=d.evento||'Evento';
+  const gerado=new Date().toLocaleString('pt-BR');
+  const genLabel={M:'Masculino',F:'Feminino'};
+
+  // melhor por gen+cat+esp
+  const melhorKey={};
+  d.pilotos.forEach(p=>{
+    d.esps.forEach(e=>{
+      const t=p.tempos[e];if(!t)return;
+      const k=`${p.gen}|${p.cat}|${e}`;
+      if(!melhorKey[k]||t.ms<melhorKey[k])melhorKey[k]=t.ms;
+    });
+  });
+
+  function secaoHTML(lista,titulo,showCat){
+    if(!lista.length)return'';
+    const semDnf=lista.filter(p=>!p.dnf);
+    const thStyle='padding:4px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #000;text-align:left;font-weight:700';
+    const tdStyle='padding:4px 8px;font-size:11px;border-bottom:1px solid #ccc';
+    const espCols=d.esps.map(e=>`<th style="${thStyle}">${e}</th>`).join('');
+    const rows=lista.map((p,i)=>{
+      const pos=p.dnf?null:semDnf.findIndex(x=>x.num===p.num)+1;
+      const posStr=p.dnf?'DNF':pos+'º';
+      const bg=i%2===0?'#fff':'#f5f5f5';
+      const espCells=d.esps.map(e=>{
+        const t=p.tempos[e];const dnf=p.dnfEsps.includes(e);
+        const isMelhor=t&&melhorKey[`${p.gen}|${p.cat}|${e}`]===t.ms;
+        const val=dnf?'DNF':t?t.str:'—';
+        return`<td style="${tdStyle};${isMelhor?'font-weight:700;text-decoration:underline':''}">${val}</td>`;
+      }).join('');
+      return`<tr style="background:${bg}">
+        <td style="${tdStyle};font-weight:700">${posStr}</td>
+        <td style="${tdStyle}">#${p.num||'?'}</td>
+        <td style="${tdStyle}">${p.nome||'—'}</td>
+        ${showCat?`<td style="${tdStyle}">${p.cat}</td>`:''}
+        ${espCells}
+        <td style="${tdStyle};font-weight:700">${p.dnf?'DNF':p.totalStr||'—'}</td>
+      </tr>`;
+    }).join('');
+    return`
+      <div style="margin-bottom:18px;page-break-inside:avoid">
+        <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin:0 0 4px;border-bottom:1px solid #000;padding-bottom:3px">${titulo}</p>
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr>
+            <th style="${thStyle};width:36px">Pos</th>
+            <th style="${thStyle};width:36px">Nº</th>
+            <th style="${thStyle}">Piloto</th>
+            ${showCat?`<th style="${thStyle}">Categoria</th>`:''}
+            ${espCols}
+            <th style="${thStyle}">Total</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  let body='';
+  ['M','F'].forEach(gen=>{
+    const gp=d.pilotos.filter(p=>p.gen===gen);if(!gp.length)return;
+    body+=`<div style="page-break-before:${gen==='F'?'always':'auto'}">
+      <p style="font-size:14px;font-weight:700;text-transform:uppercase;border-bottom:2px solid #000;padding-bottom:4px;margin:0 0 10px">${genLabel[gen]}</p>`;
+    body+=secaoHTML(gp,`${genLabel[gen]} — Geral`,true);
+    const cats=[...new Set(gp.map(p=>p.cat))];
+    if(cats.length>1){
+      cats.forEach(cat=>{
+        const cp=gp.filter(p=>p.cat===cat);
+        body+=secaoHTML(cp,`${cat}`,false);
+      });
+    }
+    body+=`</div>`;
+  });
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Resultado — ${evento}</title>
+  <style>
+    @page{margin:1.8cm 1.5cm}
+    *{box-sizing:border-box}
+    body{font-family:Arial,sans-serif;color:#000;margin:0;font-size:11px}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  </style>
+  </head><body>
+  <div style="border-bottom:2px solid #000;margin-bottom:14px;padding-bottom:8px">
+    <div style="font-size:18px;font-weight:700">${evento}</div>
+    <div style="font-size:10px;color:#444;margin-top:3px">Resultado Final &nbsp;|&nbsp; Especiais: ${d.esps.join(', ')} &nbsp;|&nbsp; Gerado: ${gerado}</div>
+  </div>
+  ${body}
+  </body></html>`;
+
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const win=window.open(url,'_blank');
+  if(win) win.onload=()=>{ setTimeout(()=>{win.print();URL.revokeObjectURL(url)},400); };
+  toast('PDF aberto para impressão');
+}
+
+// ══ UTIL ═════════════════════════════════════════════════════════════════
+function baixar(data,nome,tipo='application/json'){
+  const str=tipo==='application/json'?JSON.stringify(data,null,2):data;
+  const a=document.createElement('a');
+  a.href=`data:${tipo};charset=utf-8,`+encodeURIComponent(str);
+  a.download=nome;a.click();
+}
+
+// ══ MODAL PILOTO MANUAL ════════════════════════════════════════════════════
+document.getElementById('btn-add-piloto').addEventListener('click',abrirModal);
+
+function abrirModal(){
+  if(!espAtiva){toast('Selecione uma especial primeiro',true);return}
+  const cats=new Set(Object.values(startlist).flat().map(p=>p.cat));
+  const dl=document.getElementById('m-cat-list');dl.innerHTML='';
+  cats.forEach(c=>{const o=document.createElement('option');o.value=c;dl.appendChild(o)});
+  document.getElementById('m-num').value='';
+  document.getElementById('m-nome').value='';
+  document.getElementById('m-cat').value='';
+  document.getElementById('m-gen').value='M';
+  document.getElementById('m-hora').value='';
+  document.getElementById('modal-overlay').classList.add('aberto');
+  setTimeout(()=>document.getElementById('m-num').focus(),100);
+}
+
+function fecharModal(){
+  document.getElementById('modal-overlay').classList.remove('aberto');
+}
+
+document.getElementById('modal-overlay').addEventListener('click',function(e){
+  if(e.target===this)fecharModal();
+});
+
+document.getElementById('m-hora').addEventListener('keydown',e=>{
+  if(e.key==='Enter')confirmarPilotoManual();
+});
+
+function confirmarPilotoManual(){
+  const num=document.getElementById('m-num').value.trim();
+  const nome=document.getElementById('m-nome').value.trim();
+  const cat=document.getElementById('m-cat').value.trim()||'Geral';
+  const gen=document.getElementById('m-gen').value;
+  const horaRaw=document.getElementById('m-hora').value;
+  const hora=horaRaw?(horaRaw.length===5?horaRaw+':00':horaRaw):null;
+  if(!num&&!nome){toast('Informe pelo menos o número ou o nome',true);return}
+  if(num&&startlist[espAtiva]?.find(p=>p.num===num)){
+    toast(`#${num} já está na lista desta especial`,true);return;
+  }
+  const novoPiloto={
+    num,nome,cat,gen,
+    ordem:9000+(startlist[espAtiva]?.length||0),
+    horaLargada:hora,
+    especial:espAtiva,
+    manual:true
+  };
+  if(!startlist[espAtiva])startlist[espAtiva]=[];
+  startlist[espAtiva].push(novoPiloto);
+  fecharModal();
+  renderLista();
+  toast(`#${num||'?'} ${nome||'—'} adicionado à lista`);
+}
+</script>
+</body>
+</html>
